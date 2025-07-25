@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, Typography, Box } from '@mui/material';
 
 interface RolloverSummaryProps {
   totalRollovers: number;
@@ -8,39 +8,33 @@ interface RolloverSummaryProps {
 
 export function RolloverSummary({ totalRollovers, unassignedRollovers, unassignedOver15Min }: RolloverSummaryProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Total Rollovers
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{totalRollovers}</div>
-        </CardContent>
+    <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 2, mb: 3 }}>
+      <Card sx={{ p: 2 }}>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          Total Rollovers
+        </Typography>
+        <Typography variant="h4" component="div" fontWeight="bold">
+          {totalRollovers}
+        </Typography>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Unassigned
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-amber-600">{unassignedRollovers}</div>
-        </CardContent>
+      <Card sx={{ p: 2 }}>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          Unassigned
+        </Typography>
+        <Typography variant="h4" component="div" fontWeight="bold" color="warning.main">
+          {unassignedRollovers}
+        </Typography>
       </Card>
 
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">
-            Unassigned &gt;15 Min
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-destructive">{unassignedOver15Min}</div>
-        </CardContent>
+      <Card sx={{ p: 2 }}>
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          Unassigned &gt;15 Min
+        </Typography>
+        <Typography variant="h4" component="div" fontWeight="bold" color="error.main">
+          {unassignedOver15Min}
+        </Typography>
       </Card>
-    </div>
+    </Box>
   );
 }

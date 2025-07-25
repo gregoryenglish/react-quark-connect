@@ -1,14 +1,18 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableRow, 
+  Paper, 
+  TableContainer,
+  Select,
+  MenuItem,
+  FormControl,
+  Button,
+  Box,
+  Chip
+} from '@mui/material';
 import { format } from "date-fns";
 import { Agent } from "@/data/mockAgents";
 import { Rollover } from "@/types/rollover";
@@ -22,89 +26,98 @@ interface RolloverTableProps {
 }
 
 export function RolloverTable({ rollovers, agents, currentAgent, onAssignAgent, onAssignToMe }: RolloverTableProps) {
-  const getPropensityVariant = (propensity: string) => {
+  const getPropensityColor = (propensity: string) => {
     switch (propensity) {
       case 'high':
-        return 'destructive';
+        return 'error';
       case 'medium':
-        return 'default';
+        return 'warning';
       case 'low':
-        return 'secondary';
+        return 'success';
       default:
         return 'default';
     }
   };
 
-  const getStatusVariant = (status: string) => {
-    return status === 'assigned' ? 'default' : 'secondary';
+  const getStatusColor = (status: string) => {
+    return status === 'assigned' ? 'success' : 'default';
   };
 
   return (
-    <div className="border rounded-lg">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Appointment Agent</TableHead>
-            <TableHead>Client</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Source</TableHead>
-            <TableHead>Queue</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Propensity</TableHead>
-            <TableHead>Timestamp</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rollovers.map((rollover) => (
-            <TableRow key={rollover.id}>
-            <TableCell>
-              <div className="space-y-2">
-                <Select 
-                  value={rollover.appointmentAgent ? agents.find(a => a.name === rollover.appointmentAgent)?.id || "" : ""} 
-                  onValueChange={(agentId) => onAssignAgent(rollover.id, agentId)}
-                >
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select agent" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {agents.map((agent) => (
-                      <SelectItem key={agent.id} value={agent.id}>
-                        {agent.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button 
-                  variant="link" 
-                  size="sm" 
-                  className="h-auto p-0 text-xs"
-                  onClick={() => onAssignToMe(rollover.id)}
-                >
-                  Assign to me
-                </Button>
-              </div>
-            </TableCell>
-              <TableCell>{rollover.client}</TableCell>
-              <TableCell className="max-w-md truncate">{rollover.description}</TableCell>
-              <TableCell>{rollover.source}</TableCell>
-              <TableCell>{rollover.queue}</TableCell>
-              <TableCell>
-                <Badge variant={getStatusVariant(rollover.status)}>
-                  {rollover.status}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant={getPropensityVariant(rollover.propensity)}>
-                  {rollover.propensity}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-muted-foreground">
-                {format(rollover.timestamp, "MMM dd, yyyy HH:mm")}
-              </TableCell>
+    <Paper>
+      <TableContainer>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Appointment Agent</TableCell>
+              <TableCell>Client</TableCell>
+              <TableCell>Description</TableCell>
+              <TableCell>Source</TableCell>
+              <TableCell>Queue</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Propensity</TableCell>
+              <TableCell>Timestamp</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHead>
+          <TableBody>
+            {rollovers.map((rollover) => (
+              <TableRow key={rollover.id}>
+                <TableCell>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 150 }}>
+                    <FormControl size="small" fullWidth>
+                      <Select
+                        value={rollover.appointmentAgent ? agents.find(a => a.name === rollover.appointmentAgent)?.id || "" : ""}
+                        onChange={(e) => onAssignAgent(rollover.id, e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">
+                          <em>Select agent</em>
+                        </MenuItem>
+                        {agents.map((agent) => (
+                          <MenuItem key={agent.id} value={agent.id}>
+                            {agent.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    <Button
+                      variant="text"
+                      size="small"
+                      onClick={() => onAssignToMe(rollover.id)}
+                      sx={{ fontSize: '0.75rem', p: 0, minHeight: 'auto' }}
+                    >
+                      Assign to me
+                    </Button>
+                  </Box>
+                </TableCell>
+                <TableCell>{rollover.client}</TableCell>
+                <TableCell sx={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {rollover.description}
+                </TableCell>
+                <TableCell>{rollover.source}</TableCell>
+                <TableCell>{rollover.queue}</TableCell>
+                <TableCell>
+                  <Chip 
+                    label={rollover.status} 
+                    color={getStatusColor(rollover.status)} 
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell>
+                  <Chip 
+                    label={rollover.propensity} 
+                    color={getPropensityColor(rollover.propensity)} 
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell sx={{ color: 'text.secondary' }}>
+                  {format(rollover.timestamp, "MMM dd, yyyy HH:mm")}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
   );
 }
