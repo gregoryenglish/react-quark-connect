@@ -3,9 +3,11 @@ import { RolloverFilters } from "@/components/RolloverFilters";
 import { RolloverSummary } from "@/components/RolloverSummary";
 import { RolloverTable } from "@/components/RolloverTable";
 import { mockRollovers } from "@/data/mockRollovers";
-import { RolloverFilters as FilterType } from "@/types/rollover";
+import { mockAgents, currentAgent } from "@/data/mockAgents";
+import { RolloverFilters as FilterType, Rollover } from "@/types/rollover";
 
 const Index = () => {
+  const [rollovers, setRollovers] = useState<Rollover[]>(mockRollovers);
   const [filters, setFilters] = useState<FilterType>({
     deadlineDate: undefined,
     agent: "",
@@ -24,7 +26,7 @@ const Index = () => {
   });
 
   const filteredRollovers = useMemo(() => {
-    return mockRollovers.filter(rollover => {
+    return rollovers.filter(rollover => {
       if (filters.deadlineDate && rollover.deadlineDate.toDateString() !== filters.deadlineDate.toDateString()) return false;
       if (filters.agent && !rollover.appointmentAgent.toLowerCase().includes(filters.agent.toLowerCase())) return false;
       if (filters.queue && !rollover.queue.toLowerCase().includes(filters.queue.toLowerCase())) return false;
@@ -41,7 +43,7 @@ const Index = () => {
       if (filters.affiliate && !rollover.affiliate.toLowerCase().includes(filters.affiliate.toLowerCase())) return false;
       return true;
     });
-  }, [filters]);
+  }, [filters, rollovers]);
 
   const summary = useMemo(() => {
     const totalRollovers = filteredRollovers.length;
@@ -59,6 +61,25 @@ const Index = () => {
     };
   }, [filteredRollovers]);
 
+  const handleAssignAgent = (rolloverId: string, agentId: string) => {
+    const agent = mockAgents.find(a => a.id === agentId);
+    if (agent) {
+      setRollovers(prev => prev.map(rollover => 
+        rollover.id === rolloverId 
+          ? { ...rollover, appointmentAgent: agent.name, status: 'assigned' as const }
+          : rollover
+      ));
+    }
+  };
+
+  const handleAssignToMe = (rolloverId: string) => {
+    setRollovers(prev => prev.map(rollover => 
+      rollover.id === rolloverId 
+        ? { ...rollover, appointmentAgent: currentAgent.name, status: 'assigned' as const }
+        : rollover
+    ));
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6">
@@ -72,7 +93,13 @@ const Index = () => {
           </div>
           
           <div className="flex-1">
-            <RolloverTable rollovers={filteredRollovers} />
+            <RolloverTable 
+              rollovers={filteredRollovers} 
+              agents={mockAgents}
+              currentAgent={currentAgent}
+              onAssignAgent={handleAssignAgent}
+              onAssignToMe={handleAssignToMe}
+            />
           </div>
         </div>
       </div>

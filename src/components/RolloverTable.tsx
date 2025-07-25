@@ -7,25 +7,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
-
-interface Rollover {
-  id: string;
-  appointmentAgent: string;
-  client: string;
-  description: string;
-  source: string;
-  queue: string;
-  timestamp: Date;
-  status: 'assigned' | 'unassigned';
-  propensity: 'high' | 'medium' | 'low';
-}
+import { Agent } from "@/data/mockAgents";
+import { Rollover } from "@/types/rollover";
 
 interface RolloverTableProps {
   rollovers: Rollover[];
+  agents: Agent[];
+  currentAgent: Agent;
+  onAssignAgent: (rolloverId: string, agentId: string) => void;
+  onAssignToMe: (rolloverId: string) => void;
 }
 
-export function RolloverTable({ rollovers }: RolloverTableProps) {
+export function RolloverTable({ rollovers, agents, currentAgent, onAssignAgent, onAssignToMe }: RolloverTableProps) {
   const getPropensityVariant = (propensity: string) => {
     switch (propensity) {
       case 'high':
@@ -61,9 +57,33 @@ export function RolloverTable({ rollovers }: RolloverTableProps) {
         <TableBody>
           {rollovers.map((rollover) => (
             <TableRow key={rollover.id}>
-              <TableCell className="font-medium">
-                {rollover.appointmentAgent || "Unassigned"}
-              </TableCell>
+            <TableCell>
+              <div className="space-y-2">
+                <Select 
+                  value={rollover.appointmentAgent ? agents.find(a => a.name === rollover.appointmentAgent)?.id || "" : ""} 
+                  onValueChange={(agentId) => onAssignAgent(rollover.id, agentId)}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select agent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {agents.map((agent) => (
+                      <SelectItem key={agent.id} value={agent.id}>
+                        {agent.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  className="h-auto p-0 text-xs"
+                  onClick={() => onAssignToMe(rollover.id)}
+                >
+                  Assign to me
+                </Button>
+              </div>
+            </TableCell>
               <TableCell>{rollover.client}</TableCell>
               <TableCell className="max-w-md truncate">{rollover.description}</TableCell>
               <TableCell>{rollover.source}</TableCell>
